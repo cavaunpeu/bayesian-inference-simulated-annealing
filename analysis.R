@@ -51,3 +51,5 @@ for (step in 1:n.steps) {
 
 # plot resulting samples
 hist(mu.samples, breaks = 500, xlim = c(2.7, 3.3))
+plot(1:n.steps, mu.samples, type = "l")
+plot(200:n.steps, mu.samples[200:n.steps], type = "l")
