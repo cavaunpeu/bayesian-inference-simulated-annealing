@@ -23,11 +23,31 @@ mu.samples <- rep(x = NA, n.steps)
 mu.current <- mu.initial <- 1
 sampler.sigma <- .1
 
+# define move probability functions
+move.probability.via.simulated.annealing <- function(temperature, log.prob.mu.current, log.prob.mu.proposal) {
+  exponent <- min( 0, (log.prob.mu.proposal - log.prob.mu.current) / temperature )
+  return( exp(exponent) )
+}
+
+move.probability.via.metropolis <- function(log.prob.mu.proposal, log.prob.mu.current) {
+  return( exp( log.prob.mu.proposal - log.prob.mu.current ))
+}
+
+# define simulated annealing parameters
+temperature <- 1
+alpha <- .9999
+
 for (step in 1:n.steps) {
   mu.samples[step] <- mu.current
   mu.proposal <- rnorm(n = 1, mean = mu.current, sd = sampler.sigma)
-  log.posterior.probability.of.data.given.mu.current <- log.posterior.probability.of.data.given.mu(mu = mu.current)
-  log.posterior.probability.of.data.given.mu.proposal <- log.posterior.probability.of.data.given.mu(mu = mu.proposal)
-  move.probability <- exp(log.posterior.probability.of.data.given.mu.proposal - log.posterior.probability.of.data.given.mu.current)
+  move.probability <- move.probability.via.simulated.annealing(
+    temperature = temperature,
+    log.prob.mu.current = log.posterior.probability.of.data.given.mu(mu = mu.current),
+    log.prob.mu.proposal = log.posterior.probability.of.data.given.mu(mu = mu.proposal)
+  )
   mu.current <- ifelse(test = runif(1) < move.probability, yes = mu.proposal, no = mu.current)
+  temperature <- temperature * alpha
 }
+
+# plot resulting samples
+hist(mu.samples, breaks = 500, xlim = c(2.7, 3.3))
