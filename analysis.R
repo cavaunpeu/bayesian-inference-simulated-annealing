@@ -1,0 +1,33 @@
+# simulated super simple normal distribution data
+N <- 100
+mu.true <- 3
+sigma.true <- .5
+y <- rnorm(n = N, mean = mu.true, sd = sigma.true)
+
+# establish the prior probability distribution of mu and the likelihood function of our data given mu
+mu.prior.probability <- function(mu, mu.prior.min = -1, mu.prior.max = 6) { dunif(x = mu, min = mu.prior.min, max = mu.prior.max) }
+data.likelihood.given.mu <- function(mu, observed.data.vector = y, sigma = sigma.true) { dnorm(x = observed.data.vector, mean = mu, sd = sigma)}
+
+# combine the above functions to compute log posterior probability of mu given our data
+log.posterior.probability.of.data.given.mu <- function(mu) {
+  mu.probability <- mu.prior.probability(mu = mu)
+  data.likelihood <- data.likelihood.given.mu(mu = mu)
+  log.mu.probability <- log(mu.probability)
+  log.data.likelihood <- sum( log(data.likelihood) )
+  return( log.mu.probability + log.data.likelihood )
+}
+
+# build an MCMC engine
+n.steps <- 1e4
+mu.samples <- rep(x = NA, n.steps)
+mu.current <- mu.initial <- 1
+sampler.sigma <- .1
+
+for (step in 1:n.steps) {
+  mu.samples[step] <- mu.current
+  mu.proposal <- rnorm(n = 1, mean = mu.current, sd = sampler.sigma)
+  log.posterior.probability.of.data.given.mu.current <- log.posterior.probability.of.data.given.mu(mu = mu.current)
+  log.posterior.probability.of.data.given.mu.proposal <- log.posterior.probability.of.data.given.mu(mu = mu.proposal)
+  move.probability <- exp(log.posterior.probability.of.data.given.mu.proposal - log.posterior.probability.of.data.given.mu.current)
+  mu.current <- ifelse(test = runif(1) < move.probability, yes = mu.proposal, no = mu.current)
+}
