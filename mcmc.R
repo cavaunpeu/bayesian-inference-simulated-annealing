@@ -26,7 +26,7 @@ logPosteriorProbabilityOfDataGivenSigma <- function(mu, sigma) {
   return( log.sigma.probability + log.data.likelihood )
 }
 
-# create a metropolis sampler
+# define a metropolis sampler
 metropolisSampler <- function(mu.initial = 0, sigma.initial = 0, sampler.sigma = .1) {
 
   mu.current <- mu.initial
@@ -70,7 +70,7 @@ metropolisSampler <- function(mu.initial = 0, sigma.initial = 0, sampler.sigma =
   return(list(get = get, step = step))
 }
 
-# create a simulated annealing sampler
+# define a simulated annealing sampler
 simulatedAnnealingSampler <- function(mu.initial = 0, sigma.initial = 0, sampler.sigma = .1) {
 
   mu.current <- mu.initial
