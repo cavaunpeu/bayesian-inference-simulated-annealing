@@ -43,7 +43,7 @@ ui <- fluidPage(
 
 server <- shinyServer(function(input, output, session){
 
-  sampler <- metropolis.sampler()
+  sampler <- simulated.annealing.sampler()
 
   incremental.steps <- 25
   total.steps <- 2e3

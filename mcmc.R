@@ -69,3 +69,54 @@ metropolis.sampler <- function(mu.initial = 0, sigma.initial = 0, sampler.sigma 
 
   return(list(get = get, step = step))
 }
+
+# create a simulated annealing sampler
+simulated.annealing.sampler <- function(mu.initial = 0, sigma.initial = 0, sampler.sigma = .1) {
+
+  mu.current <- mu.initial
+  sigma.current <- sigma.initial
+  temperature.current <- 1
+  alpha <- .9999
+  mu.samples <- vector()
+  sigma.samples <- vector()
+
+  move.probability <- function(temperature, log.prob.current, log.prob.proposal) {
+    exponent <- min( 0, (log.prob.proposal - log.prob.current) / temperature )
+    return( exp(exponent) )
+  }
+
+  single_step <- function() {
+    mu.samples <<- append(mu.samples, mu.current)
+    sigma.samples <<- append(sigma.samples, sigma.current)
+
+    mu.proposal <- rnorm(n = 1, mean = mu.current, sd = sampler.sigma)
+    mu.move.probability <- move.probability(
+      temperature = temperature.current,
+      log.prob.current = log.posterior.probability.of.data.given.mu(mu = mu.current, sigma = sigma.current),
+      log.prob.proposal = log.posterior.probability.of.data.given.mu(mu = mu.proposal, sigma = sigma.current)
+    )
+    mu.current <<- ifelse(test = runif(1) < mu.move.probability, yes = mu.proposal, no = mu.current)
+
+    sigma.proposal <- rnorm(n = 1, mean = sigma.current, sd = sampler.sigma)
+    if (sigma.proposal < 1) sigma.proposal <- abs(sigma.proposal)
+    sigma.move.probability <- move.probability(
+      temperature = temperature.current,
+      log.prob.current = log.posterior.probability.of.data.given.sigma(mu = mu.current, sigma = sigma.current),
+      log.prob.proposal = log.posterior.probability.of.data.given.sigma(mu = mu.current, sigma = sigma.proposal)
+    )
+    sigma.current <<- ifelse(test = runif(1) < sigma.move.probability, yes = sigma.proposal, no = sigma.current)
+
+    temperature.current <<- temperature.current * alpha
+  }
+
+  step <- function(n.steps = 1) {
+    for (i in 1:n.steps) single_step()
+  }
+
+  get <- function(samples.vector = c("mu.samples", "sigma.samples")) {
+    samples.vector <- match.arg(samples.vector)
+    switch(samples.vector, mu.samples = mu.samples, sigma.samples = sigma.samples)
+  }
+
+  return(list(get = get, step = step))
+}
