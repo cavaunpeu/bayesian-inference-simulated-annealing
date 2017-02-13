@@ -1,8 +1,6 @@
-library(shiny)
-library(latex2exp)
-library(shinyIncubator)
-
+lapply(c("shiny", "latex2exp", "shinyIncubator"), require, character.only = TRUE)
 source("mcmc.R")
+
 
 resetSampling <- function(inputObject) {
   step.counter <<- 0
