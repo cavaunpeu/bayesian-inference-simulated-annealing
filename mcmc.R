@@ -1,0 +1,67 @@
+# generate our data
+N <- 100
+mu.true <- 3
+sigma.true <- .5
+y <- rnorm(n = N, mean = mu.true, sd = sigma.true)
+
+# establish the prior probability distribution of mu and sigma, and the likelihood function of our data given both
+mu.prior.probability <- function(mu, mean = 0, sigma = 10) { dnorm(x = mu, mean = mean, sd = sigma) }
+sigma.prior.probability <- function(sigma, min = 0, max = 5) { dunif(x = sigma, min = min, max = max) }
+data.likelihood.given.mu.and.sigma <- function(mu, observed.data.vector = y, sigma = sigma) { dnorm(x = observed.data.vector, mean = mu, sd = sigma)}
+
+# combine the above functions to compute log posterior probability of mu given our data
+log.posterior.probability.of.data.given.mu <- function(mu, sigma) {
+  mu.probability <- mu.prior.probability(mu = mu)
+  data.likelihood <- data.likelihood.given.mu.and.sigma(mu = mu, sigma = sigma)
+  log.mu.probability <- log(mu.probability + 1)
+  log.data.likelihood <- sum( log(data.likelihood + 1) )
+  return( log.mu.probability + log.data.likelihood )
+}
+
+log.posterior.probability.of.data.given.sigma <- function(mu, sigma) {
+  sigma.probability <- sigma.prior.probability(sigma = sigma)
+  data.likelihood <- data.likelihood.given.mu.and.sigma(mu = mu, sigma = sigma)
+  log.sigma.probability <- log(sigma.probability + 1)
+  log.data.likelihood <- sum( log(data.likelihood + 1) )
+  return( log.sigma.probability + log.data.likelihood )
+}
+
+# create a metropolis sampler
+metropolis.sampler <- function(mu.initial = 0, sigma.initial = 0, sampler.sigma = .1) {
+
+  mu.current <- mu.initial
+  sigma.current <- sigma.initial
+  mu.samples <- vector()
+  sigma.samples <- vector()
+
+  move.probability <- function(log.prob.proposal, log.prob.current) {
+    return( exp( log.prob.proposal - log.prob.current ))
+  }
+
+  step <- function() {
+    mu.samples <<- append(mu.samples, mu.current)
+    sigma.samples <<- append(sigma.samples, sigma.current)
+
+    mu.proposal <- rnorm(n = 1, mean = mu.current, sd = sampler.sigma)
+    mu.move.probability <- move.probability(
+      log.prob.current = log.posterior.probability.of.data.given.mu(mu = mu.current, sigma = sigma.current),
+      log.prob.proposal = log.posterior.probability.of.data.given.mu(mu = mu.proposal, sigma = sigma.current)
+    )
+    mu.current <<- ifelse(test = runif(1) < mu.move.probability, yes = mu.proposal, no = mu.current)
+
+    sigma.proposal <- rnorm(n = 1, mean = sigma.current, sd = sampler.sigma)
+    if (sigma.proposal < 1) sigma.proposal <- abs(sigma.proposal)
+    sigma.move.probability <- move.probability(
+      log.prob.current = log.posterior.probability.of.data.given.sigma(mu = mu.current, sigma = sigma.current),
+      log.prob.proposal = log.posterior.probability.of.data.given.sigma(mu = mu.current, sigma = sigma.proposal)
+    )
+    sigma.current <<- ifelse(test = runif(1) < sigma.move.probability, yes = sigma.proposal, no = sigma.current)
+  }
+
+  get <- function(samples.vector = c("mu.samples", "sigma.samples")) {
+    samples.vector <- match.arg(samples.vector)
+    switch(samples.vector, mu.samples = mu.samples, sigma.samples = sigma.samples)
+  }
+
+  return(list(get = get, step = step))
+}
