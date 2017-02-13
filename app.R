@@ -69,6 +69,7 @@ server <- shinyServer(function(input, output, session){
   step.counter <- 0
 
   observe({
+    # `input$run` has a value of 0 when instantiated, and increases by 1 every time it's clicked.
     if (input$run == 0)
       return()
 
