@@ -52,8 +52,8 @@ metropolisSampler <- function(mu.initial = 0, sigma.initial = 0, sampler.sigma =
     sigma.proposal <- rnorm(n = 1, mean = sigma.current, sd = sampler.sigma)
     if (sigma.proposal < 1) sigma.proposal <- abs(sigma.proposal)
     sigma.move.probability <- moveProbability(
-      log.prob.current = log.posterior.probability.of.data.given.sigma(mu = mu.current, sigma = sigma.current),
-      log.prob.proposal = log.posterior.probability.of.data.given.sigma(mu = mu.current, sigma = sigma.proposal)
+      log.prob.current = logPosteriorProbabilityOfDataGivenSigma(mu = mu.current, sigma = sigma.current),
+      log.prob.proposal = logPosteriorProbabilityOfDataGivenSigma(mu = mu.current, sigma = sigma.proposal)
     )
     sigma.current <<- ifelse(test = runif(1) < sigma.move.probability, yes = sigma.proposal, no = sigma.current)
   }
@@ -101,8 +101,8 @@ simulatedAnnealingSampler <- function(mu.initial = 0, sigma.initial = 0, sampler
     if (sigma.proposal < 1) sigma.proposal <- abs(sigma.proposal)
     sigma.move.probability <- moveProbability(
       temperature = temperature.current,
-      log.prob.current = log.posterior.probability.of.data.given.sigma(mu = mu.current, sigma = sigma.current),
-      log.prob.proposal = log.posterior.probability.of.data.given.sigma(mu = mu.current, sigma = sigma.proposal)
+      log.prob.current = logPosteriorProbabilityOfDataGivenSigma(mu = mu.current, sigma = sigma.current),
+      log.prob.proposal = logPosteriorProbabilityOfDataGivenSigma(mu = mu.current, sigma = sigma.proposal)
     )
     sigma.current <<- ifelse(test = runif(1) < sigma.move.probability, yes = sigma.proposal, no = sigma.current)
 
