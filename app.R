@@ -1,5 +1,6 @@
 library(shiny)
 library(latex2exp)
+library(shinyIncubator)
 
 source("mcmc.R")
 
@@ -20,8 +21,13 @@ ui <- fluidPage(
         ),
         helpText("Next, we attempt to recover these parameters via MCMC using the observed data alone."),
         tags$hr(),
-        h3("Sampler Strategy"),
-        helpText("Metroplis.")
+        selectInput(
+          "strategy",
+          label = h3("Sampler Strategy"),
+          choices = list("Simulated Annealing" = 1, "Metropolis" = 2),
+          selected = 1
+        ),
+        actionButton("run", "Run")
       ),
       wellPanel(
         h3("Documentation"),
@@ -43,22 +49,38 @@ ui <- fluidPage(
 
 server <- shinyServer(function(input, output, session){
 
-  sampler <- simulated.annealing.sampler()
-
   incremental.steps <- 25
   total.steps <- 2e3
   step.counter <- 0
 
-  # Plot the 30 most recent values
-  output$plotPanel <- renderPlot({
-    if (step.counter < total.steps) invalidateLater(100, session)
-    sampler$step(n.steps = incremental.steps)
-    plot(
-      x = sampler$get("mu.samples"), y = sampler$get("sigma.samples"),
-      type = "l",
-      xlab = latex2exp::TeX("$\\mu$"), ylab = latex2exp::TeX("$\\sigma$"), main = latex2exp::TeX("Joint Trace Plot of $\\mu$ and $\\sigma$ Samples")
-    )
-    step.counter <<- step.counter + incremental.steps
+  observe({
+    if (input$run == 0)
+      return()
+
+    isolate({
+
+      if (input$strategy == 2) {
+        sampler <- metropolis.sampler()
+      } else {
+        sampler <- simulated.annealing.sampler()
+      }
+      step.counter <<- 0
+
+      output$plotPanel <- renderPlot({
+
+        cat(step.counter, input$strategy, "\n")
+
+        if (step.counter < total.steps) invalidateLater(100, session)
+        sampler$step(n.steps = incremental.steps)
+        plot(
+          x = sampler$get("mu.samples"), y = sampler$get("sigma.samples"),
+          type = "l",
+          xlab = latex2exp::TeX("$\\mu$"), ylab = latex2exp::TeX("$\\sigma$"), main = latex2exp::TeX("Joint Trace Plot of $\\mu$ and $\\sigma$ Samples")
+        )
+        step.counter <<- step.counter + incremental.steps
+
+      })
+    })
   })
 })
 
