@@ -38,7 +38,7 @@ metropolis.sampler <- function(mu.initial = 0, sigma.initial = 0, sampler.sigma 
     return( exp( log.prob.proposal - log.prob.current ))
   }
 
-  step <- function() {
+  single_step <- function() {
     mu.samples <<- append(mu.samples, mu.current)
     sigma.samples <<- append(sigma.samples, sigma.current)
 
@@ -56,6 +56,10 @@ metropolis.sampler <- function(mu.initial = 0, sigma.initial = 0, sampler.sigma 
       log.prob.proposal = log.posterior.probability.of.data.given.sigma(mu = mu.current, sigma = sigma.proposal)
     )
     sigma.current <<- ifelse(test = runif(1) < sigma.move.probability, yes = sigma.proposal, no = sigma.current)
+  }
+
+  step <- function(n.steps = 1) {
+    for (i in 1:n.steps) single_step()
   }
 
   get <- function(samples.vector = c("mu.samples", "sigma.samples")) {
