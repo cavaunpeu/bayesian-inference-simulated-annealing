@@ -5,9 +5,9 @@ source("mcmc.R")
 resetSampling <- function(inputObject) {
   step.counter <<- 0
   if (inputObject$strategy == 2) {
-    return( metropolis.sampler() )
+    return( metropolisSampler() )
   } else {
-    return( simulated.annealing.sampler() )
+    return( simulatedAnnealingSampler() )
   }
 }
 
@@ -73,7 +73,6 @@ server <- shinyServer(function(input, output, session){
       return()
 
     isolate({
-
       sampler <- resetSampling(inputObject = input)
 
       output$plotPanel <- renderPlot({
@@ -83,7 +82,6 @@ server <- shinyServer(function(input, output, session){
         sampler$step(n.steps = incremental.steps)
         plotJointTrace(sampler)
         step.counter <<- step.counter + incremental.steps
-
       })
     })
   })
