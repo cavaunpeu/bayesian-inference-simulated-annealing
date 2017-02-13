@@ -1,4 +1,5 @@
 library(shiny)
+library(latex2exp)
 
 source("mcmc.R")
 
@@ -62,7 +63,11 @@ server <- shinyServer(function(input, output, session){
   output$plotPanel <- renderPlot({
     if (step.counter < total.steps) invalidateLater(100, session)
     sampler$step(n.steps = incremental.steps)
-    plot(x = sampler$get("mu.samples"), y = sampler$get("sigma.samples"), type = "l")
+    plot(
+      x = sampler$get("mu.samples"), y = sampler$get("sigma.samples"),
+      type = "l",
+      xlab = latex2exp::TeX("$\\mu$"), ylab = latex2exp::TeX("$\\sigma$"), main = latex2exp::TeX("Joint Trace Plot of $\\mu$ and $\\sigma$ Samples")
+    )
     step.counter <<- step.counter + incremental.steps
   })
 })
