@@ -13,23 +13,15 @@ ui <- fluidPage(
       width = 4,
       wellPanel(
         h3("What's this?"),
+        helpText("This is a visual demonstration of a simple MCMC sampler."),
         helpText(
-          "This is a visual demonstration of a simple MCMC sampler. First, \\(N = 100\\) data points are generated
-          artificially from a normal distribution with \\(\\mu_{true} = 3\\) and \\(\\sigma_{true} = .5\\). Next,
-          we attempt to recover these true parameters via MCMC using the observed data alone."
-          )
-      ),
-      wellPanel(
-        h3("Data Generation"),
-        helpText("The observed data can be generated with the following code: `y <- rnorm(n = 100, mean = 3, sd = 5)`."),
+          "First, \\(N = 100\\) data points are generated artificially from a normal distribution with
+          \\(\\mu_{true} = 3\\) , \\(\\sigma_{true} = .5\\)."
+        ),
+        helpText("Next, we attempt to recover these parameters via MCMC using the observed data alone."),
         tags$hr(),
-        h3("Upload report"),
-        fileInput(
-          inputId = "rescue.time.report",
-          label = NULL,
-          multiple = FALSE,
-          accept = c("text/csv, text/comma-separated-values", ".csv")
-        )
+        h3("Sampler Strategy"),
+        helpText("Metroplis.")
       ),
       wellPanel(
         h3("Documentation"),
