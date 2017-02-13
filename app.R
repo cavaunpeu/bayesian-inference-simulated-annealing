@@ -4,6 +4,23 @@ library(shinyIncubator)
 
 source("mcmc.R")
 
+resetSampling <- function(inputObject) {
+  step.counter <<- 0
+  if (inputObject$strategy == 2) {
+    return( metropolis.sampler() )
+  } else {
+    return( simulated.annealing.sampler() )
+  }
+}
+
+plotJointTrace <- function(sampler) {
+  plot(
+    x = sampler$get("mu.samples"), y = sampler$get("sigma.samples"),
+    type = "l",
+    xlab = latex2exp::TeX("$\\mu$"), ylab = latex2exp::TeX("$\\sigma$"), main = latex2exp::TeX("Joint Trace Plot of $\\mu$ and $\\sigma$ Samples")
+  )
+}
+
 ui <- fluidPage(
 
   titlePanel("Bayesian Inference via Simulated Annealing"),
@@ -59,24 +76,14 @@ server <- shinyServer(function(input, output, session){
 
     isolate({
 
-      if (input$strategy == 2) {
-        sampler <- metropolis.sampler()
-      } else {
-        sampler <- simulated.annealing.sampler()
-      }
-      step.counter <<- 0
+      sampler <- resetSampling(inputObject = input)
 
       output$plotPanel <- renderPlot({
 
-        cat(step.counter, input$strategy, "\n")
-
         if (step.counter < total.steps) invalidateLater(100, session)
+
         sampler$step(n.steps = incremental.steps)
-        plot(
-          x = sampler$get("mu.samples"), y = sampler$get("sigma.samples"),
-          type = "l",
-          xlab = latex2exp::TeX("$\\mu$"), ylab = latex2exp::TeX("$\\sigma$"), main = latex2exp::TeX("Joint Trace Plot of $\\mu$ and $\\sigma$ Samples")
-        )
+        plotJointTrace(sampler)
         step.counter <<- step.counter + incremental.steps
 
       })
