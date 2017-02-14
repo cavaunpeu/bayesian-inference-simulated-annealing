@@ -48,9 +48,9 @@ ui <- fluidPage(
         h3("Documentation"),
         helpText(
           "Voilà the",
-          tags$a(href="https://github.com/cavaunpeu/rescue-time-estimation", "code"),
+          tags$a(href="https://github.com/cavaunpeu/bayesian-inference-simulated-annealing", "code"),
           "and",
-          tags$a(href="http://wp.me/p4zXJT-fm", "blog post"),
+          tags$a(href="http://wp.me/p4zXJT-gz", "blog post"),
           "accompanying this project."
         )
       )
