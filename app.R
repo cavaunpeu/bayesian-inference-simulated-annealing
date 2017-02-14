@@ -78,7 +78,7 @@ server <- shinyServer(function(input, output, session){
 
       output$plotPanel <- renderPlot({
 
-        if (step.counter < total.steps) invalidateLater(500, session)
+        if (step.counter < total.steps) invalidateLater(125, session)
 
         sampler$step(n.steps = incremental.steps)
         plotJointTrace(sampler)
